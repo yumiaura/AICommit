@@ -4,10 +4,10 @@
 
 ## v0.1.0 — MVP (1 day)
 
-- [ ] `aicommit` CLI that reads `git diff --staged`
-- [ ] POSTs the diff to a local Ollama instance with a hard-coded prompt
-- [ ] Prints the suggested message to stdout
-- [ ] No interactive editor yet — just print + exit
+- [x] `aicommit` CLI that reads `git diff --staged`
+- [x] POSTs the diff to a local Ollama instance with a hard-coded prompt
+- [x] Prints the suggested message to stdout
+- [x] No interactive editor yet — just print + exit
 
 Acceptance: `git diff --staged | aicommit` prints a sensible message.
 
