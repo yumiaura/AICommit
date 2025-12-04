@@ -15,10 +15,10 @@ Acceptance: `git diff --staged | aicommit` prints a sensible message.
 
 ## v0.2.0 — Interactive loop (1 day)
 
-- [ ] `[Enter / e / r / q]` prompt after the suggestion
-- [ ] `e` opens the message in `$EDITOR` (fallback: `vi`)
-- [ ] `r` regenerates with a slightly different temperature
-- [ ] `Enter` runs `git commit -F <tmpfile>`
+- [x] `[Enter / e / r / q]` prompt after the suggestion
+- [x] `e` opens the message in `$EDITOR` (fallback: `vi`)
+- [x] `r` regenerates with a slightly different temperature
+- [x] `Enter` runs `git commit -F <tmpfile>`
 - [ ] Show a colored diff summary above the proposal
 
 ---
