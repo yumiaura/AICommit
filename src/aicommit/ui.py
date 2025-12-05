@@ -2,12 +2,65 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 import tempfile
 from typing import Callable
 
 from aicommit import git
+
+
+class _A:
+    RESET = "\x1b[0m"
+    DIM = "\x1b[2m"
+    BOLD = "\x1b[1m"
+    GREEN = "\x1b[32m"
+    RED = "\x1b[31m"
+    YELLOW = "\x1b[33m"
+    CYAN = "\x1b[36m"
+
+
+def use_color() -> bool:
+    """Honour NO_COLOR (https://no-color.org) and only colorize on a TTY."""
+    if os.environ.get("NO_COLOR"):
+        return False
+    return sys.stdout.isatty()
+
+
+def _c(s: str, color: str) -> str:
+    if not use_color():
+        return s
+    return f"{color}{s}{_A.RESET}"
+
+
+_STAT_NUMS = re.compile(r"^(?P<head>.+?\|\s*\d+\s*)(?P<marks>[+\-]+)\s*$")
+
+
+def color_diff_stat(stat: str) -> str:
+    """Recolour the `+`/`-` markers in `git diff --stat` output."""
+    if not use_color() or not stat:
+        return stat
+    out = []
+    for line in stat.splitlines():
+        m = _STAT_NUMS.match(line)
+        if m:
+            plus = _c("+" * m.group("marks").count("+"), _A.GREEN)
+            minus = _c("-" * m.group("marks").count("-"), _A.RED)
+            out.append(f"{m.group('head')}{plus}{minus}")
+        else:
+            out.append(line)
+    return "\n".join(out)
+
+
+def print_diff_stat(stat: str) -> None:
+    if not stat.strip():
+        return
+    bar = "─" * 56
+    print(_c(bar, _A.DIM))
+    print(_c("staged changes:", _A.BOLD))
+    print(_c(bar, _A.DIM))
+    print(color_diff_stat(stat.rstrip()))
 
 
 def _editor() -> list[str]:
@@ -36,11 +89,11 @@ def edit_message(initial: str) -> str:
 
 def print_proposal(message: str) -> None:
     bar = "─" * 56
-    print(bar)
-    print("proposed commit message:")
-    print(bar)
+    print(_c(bar, _A.DIM))
+    print(_c("proposed commit message:", _A.BOLD))
+    print(_c(bar, _A.DIM))
     print(message)
-    print(bar)
+    print(_c(bar, _A.DIM))
 
 
 def _prompt_choice() -> str:
