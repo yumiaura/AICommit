@@ -1,18 +1,13 @@
 """aicommit CLI entry point."""
 from __future__ import annotations
 
-import os
 import sys
 
+from aicommit import config as cfgmod
 from aicommit import git, ui
 from aicommit.git import GitError
-from aicommit.llm import OllamaError
-from aicommit.llm.ollama import OllamaBackend
+from aicommit.llm import OllamaError, make_backend
 from aicommit.prompts import build_commit_prompt
-
-DEFAULT_URL = os.environ.get("AICOMMIT_OLLAMA_URL", "http://localhost:11434")
-DEFAULT_MODEL = os.environ.get("AICOMMIT_MODEL", "qwen2.5-coder:7b")
-DEFAULT_TEMPERATURE = float(os.environ.get("AICOMMIT_TEMPERATURE", "0.2"))
 
 
 def _read_diff() -> tuple[str, bool]:
@@ -27,17 +22,24 @@ def _read_diff() -> tuple[str, bool]:
 
 
 def main() -> int:
+    cfg = cfgmod.load()
     diff, from_stdin = _read_diff()
     if not diff.strip():
         sys.stderr.write("no staged changes (and nothing on stdin)\n")
         return 1
 
-    backend = OllamaBackend(
-        url=DEFAULT_URL,
-        model=DEFAULT_MODEL,
-        temperature=DEFAULT_TEMPERATURE,
+    backend = make_backend(
+        cfg.llm_backend,
+        url=cfg.llm_url,
+        model=cfg.llm_model,
+        temperature=cfg.llm_temperature,
+        max_tokens=cfg.llm_max_tokens,
     )
-    prompt = build_commit_prompt(diff)
+    prompt = build_commit_prompt(
+        diff,
+        style=cfg.commit_style,
+        include_body=cfg.commit_include_body,
+    )
 
     def _ask(temperature: float | None = None) -> str:
         try:
@@ -57,10 +59,9 @@ def main() -> int:
     try:
         ui.print_diff_stat(git.staged_stat())
     except GitError:
-        pass  # already showed; non-fatal
+        pass  # non-fatal — the stat is just decoration
 
-    # Interactive: each `r` bumps temperature slightly so re-rolls differ.
-    state = {"temperature": DEFAULT_TEMPERATURE}
+    state = {"temperature": cfg.llm_temperature}
 
     def _regenerate() -> str:
         state["temperature"] = min(1.0, state["temperature"] + 0.15)
