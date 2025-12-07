@@ -19,6 +19,7 @@ dependencies = []
 
 [project.scripts]
 aicommit = "aicommit.cli:main"
+git-aicommit = "aicommit.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/yumiaura/aicommit"
