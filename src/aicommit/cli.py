@@ -8,6 +8,7 @@ from typing import Any
 from aicommit import __version__
 from aicommit import config as cfgmod
 from aicommit import git, ui
+from aicommit.commands import changelog as changelog_cmd
 from aicommit.git import GitError
 from aicommit.llm import LLMError, OllamaError, make_backend
 from aicommit.prompts import build_commit_prompt
@@ -20,39 +21,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--version", action="version", version=f"aicommit {__version__}")
 
-    # LLM overrides
-    p.add_argument("--backend", choices=["ollama", "llama-cpp"], help="LLM backend")
-    p.add_argument("--model", help="model name (or path for llama-cpp)")
+    # Global LLM overrides — apply to every subcommand.
+    p.add_argument("--backend", choices=["ollama", "llama-cpp"])
+    p.add_argument("--model")
     p.add_argument("--url", help="Ollama base URL (e.g. http://10.0.0.5:11434)")
-    p.add_argument("--temperature", type=float, help="sampling temperature")
-    p.add_argument("--max-tokens", type=int, dest="max_tokens", help="max tokens in response")
+    p.add_argument("--temperature", type=float)
+    p.add_argument("--max-tokens", type=int, dest="max_tokens")
+    p.add_argument("--style", choices=["conventional", "plain"])
+    p.add_argument("--no-body", action="store_true")
+    p.add_argument("--print", action="store_true", dest="print_only")
+    p.add_argument("-y", "--yes", action="store_true")
+    p.add_argument("--debug", action="store_true")
 
-    # Commit shape
-    p.add_argument("--style", choices=["conventional", "plain"], help="commit message style")
-    p.add_argument(
-        "--no-body",
-        action="store_true",
-        help="subject line only (no body)",
-    )
-
-    # Behaviour
-    p.add_argument(
-        "--print",
-        action="store_true",
-        dest="print_only",
-        help="print the message and exit (skip the interactive loop)",
-    )
-    p.add_argument(
-        "-y",
-        "--yes",
-        action="store_true",
-        help="commit immediately without prompting",
-    )
-    p.add_argument(
-        "--debug",
-        action="store_true",
-        help="print the resolved config sources to stderr",
-    )
+    sub = p.add_subparsers(dest="cmd", metavar="[changelog]")
+    chg = sub.add_parser("changelog", help="generate a CHANGELOG.md entry from a git range")
+    chg.add_argument("range", help="git revision range, e.g. v0.3.0..HEAD")
+    chg.add_argument("--out", help="prepend to this file under ## Unreleased")
     return p
 
 
@@ -94,12 +78,20 @@ def _read_diff() -> tuple[str, bool]:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-
     cfg = cfgmod.load(_cli_overrides(args))
     if args.debug:
         sys.stderr.write(f"[debug] config sources: {' < '.join(cfg.sources)}\n")
-        sys.stderr.write(f"[debug] backend={cfg.llm_backend} url={cfg.llm_url} model={cfg.llm_model}\n")
+        sys.stderr.write(
+            f"[debug] backend={cfg.llm_backend} url={cfg.llm_url} model={cfg.llm_model}\n"
+        )
 
+    if args.cmd == "changelog":
+        return changelog_cmd.run(args.range, cfg=cfg, out_path=args.out)
+
+    return _commit_flow(args, cfg)
+
+
+def _commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
     diff, from_stdin = _read_diff()
     if not diff.strip():
         sys.stderr.write("no staged changes (and nothing on stdin)\n")
