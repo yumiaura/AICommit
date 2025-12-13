@@ -44,6 +44,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="run the review pass and exit (useful in CI; exits 1 if findings)",
     )
     p.add_argument("--debug", action="store_true")
+    p.add_argument(
+        "--no-stream",
+        action="store_true",
+        dest="no_stream",
+        help="disable token-by-token streaming in --print mode",
+    )
 
     sub = p.add_subparsers(dest="cmd", metavar="[changelog]")
     chg = sub.add_parser("changelog", help="generate a CHANGELOG.md entry from a git range")
@@ -141,14 +147,39 @@ def _commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
         except OllamaError as e:
             raise SystemExit(_emit_ollama_error(e))
 
+    def _ask_stream() -> str:
+        chunks: list[str] = []
+        try:
+            for piece in backend.stream(prompt):
+                chunks.append(piece)
+                sys.stdout.write(piece)
+                sys.stdout.flush()
+        except OllamaError as e:
+            raise SystemExit(_emit_ollama_error(e))
+        sys.stdout.write("\n")
+        return "".join(chunks).strip()
+
+    # In print/pipe mode, stream by default — gives interactive feel even
+    # though we're just dumping to stdout. Interactive mode buffers so the
+    # boxed proposal renders cleanly.
+    if from_stdin or args.print_only:
+        if args.no_stream or not hasattr(backend, "stream"):
+            message = _ask()
+            if not message:
+                sys.stderr.write("error: empty response from LLM\n")
+                return 2
+            print(message)
+        else:
+            message = _ask_stream()
+            if not message:
+                sys.stderr.write("error: empty response from LLM\n")
+                return 2
+        return 0
+
     message = _ask()
     if not message:
         sys.stderr.write("error: empty response from LLM\n")
         return 2
-
-    if from_stdin or args.print_only:
-        print(message)
-        return 0
 
     if args.yes:
         try:
