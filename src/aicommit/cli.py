@@ -7,6 +7,7 @@ from typing import Any
 
 from aicommit import __version__
 from aicommit import config as cfgmod
+from aicommit import diff as diffmod
 from aicommit import git, ui
 from aicommit.commands import changelog as changelog_cmd
 from aicommit.commands import review as review_cmd
@@ -135,6 +136,9 @@ def _commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
         sys.stderr.write(f"error: {e}\n")
         return 2
 
+    _, truncated = diffmod.truncate_diff(diff, max_tokens=2048)
+    if truncated and args.debug:
+        sys.stderr.write("[debug] diff truncated to fit prompt budget\n")
     prompt = build_commit_prompt(
         diff,
         style=cfg.commit_style,
