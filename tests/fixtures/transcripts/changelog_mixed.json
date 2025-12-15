@@ -1,0 +1,6 @@
+[
+  {
+    "endpoint": "/api/generate",
+    "response": "### Changed\n- consolidated the database connection helpers\n- moved logging config out of main.py"
+  }
+]

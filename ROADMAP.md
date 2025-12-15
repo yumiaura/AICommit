@@ -51,10 +51,10 @@ Acceptance: `git diff --staged | aicommit` prints a sensible message.
 
 ## v0.6.0 — Quality + polish
 
-- [ ] `llama-cpp-python` backend so users can run without Ollama
-- [ ] Streaming output so long messages appear progressively
-- [ ] Token-budget aware diff truncation for huge changes
-- [ ] Unit tests with recorded LLM transcripts (`vcrpy`-style)
+- [x] `llama-cpp-python` backend so users can run without Ollama
+- [x] Streaming output so long messages appear progressively
+- [x] Token-budget aware diff truncation for huge changes
+- [x] Unit tests with recorded LLM transcripts (`vcrpy`-style)
 
 ---
 
