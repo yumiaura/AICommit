@@ -6,7 +6,7 @@ import re
 import subprocess
 import sys
 import tempfile
-from typing import Callable
+from collections.abc import Callable
 
 from aicommit import git
 
@@ -78,7 +78,7 @@ def edit_message(initial: str) -> str:
             if not initial.endswith("\n"):
                 f.write("\n")
         subprocess.run([*_editor(), path], check=False)
-        with open(path, "r") as f:
+        with open(path) as f:
             return f.read().strip()
     finally:
         try:

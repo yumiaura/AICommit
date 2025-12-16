@@ -1,8 +1,8 @@
 from aicommit.commands.changelog import (
+    _build_body,
     _classify_conventional,
     _merge_unreleased,
     _render_deterministic,
-    _build_body,
 )
 from aicommit.config import load
 

@@ -5,10 +5,9 @@ import argparse
 import sys
 from typing import Any
 
-from aicommit import __version__
+from aicommit import __version__, git, ui
 from aicommit import config as cfgmod
 from aicommit import diff as diffmod
-from aicommit import git, ui
 from aicommit.commands import changelog as changelog_cmd
 from aicommit.commands import review as review_cmd
 from aicommit.git import GitError
@@ -149,7 +148,7 @@ def _commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
         try:
             return backend.generate(prompt, temperature=temperature)
         except OllamaError as e:
-            raise SystemExit(_emit_ollama_error(e))
+            raise SystemExit(_emit_ollama_error(e)) from e
 
     def _ask_stream() -> str:
         chunks: list[str] = []
@@ -159,7 +158,7 @@ def _commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
                 sys.stdout.write(piece)
                 sys.stdout.flush()
         except OllamaError as e:
-            raise SystemExit(_emit_ollama_error(e))
+            raise SystemExit(_emit_ollama_error(e)) from e
         sys.stdout.write("\n")
         return "".join(chunks).strip()
 

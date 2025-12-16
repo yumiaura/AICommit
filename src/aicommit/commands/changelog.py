@@ -8,7 +8,6 @@ from aicommit import git
 from aicommit.config import Config
 from aicommit.llm import OllamaError, make_backend
 
-
 # Keep a Changelog buckets, in the order they should appear.
 BUCKETS = ["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"]
 
@@ -173,7 +172,7 @@ def _build_body(
 
 def _prepend_to_changelog(path: str, section: str) -> None:
     try:
-        with open(path, "r") as f:
+        with open(path) as f:
             existing = f.read()
     except FileNotFoundError:
         existing = "# Changelog\n\n"

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import re
 
-
 # A reasonable rule of thumb for code-heavy English: ~3.5 chars/token for
 # llama-family tokenizers. Round up to 4 to err on the side of *truncating
 # more*, not less.
