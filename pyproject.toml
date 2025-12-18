@@ -1,6 +1,6 @@
 [project]
 name = "aicommit"
-version = "0.6.0"
+version = "1.0.0"
 description = "AI commit messages from your local LLM"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -8,11 +8,13 @@ license = { text = "MIT" }
 authors = [{ name = "yumiaura" }]
 keywords = ["git", "commit", "llm", "ollama", "conventional-commits"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Version Control :: Git",
 ]
 dependencies = []
