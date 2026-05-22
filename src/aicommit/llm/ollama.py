@@ -27,7 +27,7 @@ class OllamaBackend:
         self.max_tokens = max_tokens
         self.timeout = timeout
 
-    def _payload(self, prompt: str, *, temperature: float | None, stream: bool) -> dict:
+    def build_payload(self, prompt: str, *, temperature: float | None, stream: bool) -> dict:
         return {
             "model": self.model,
             "prompt": prompt,
@@ -39,7 +39,7 @@ class OllamaBackend:
         }
 
     def generate(self, prompt: str, *, temperature: float | None = None) -> str:
-        req = self._build_request(self._payload(prompt, temperature=temperature, stream=False))
+        req = self.build_request(self.build_payload(prompt, temperature=temperature, stream=False))
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 body = json.loads(resp.read().decode("utf-8"))
@@ -52,7 +52,7 @@ class OllamaBackend:
 
     def stream(self, prompt: str, *, temperature: float | None = None) -> Iterator[str]:
         """Yield response chunks as they arrive from Ollama's NDJSON stream."""
-        req = self._build_request(self._payload(prompt, temperature=temperature, stream=True))
+        req = self.build_request(self.build_payload(prompt, temperature=temperature, stream=True))
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 for raw in resp:
@@ -73,7 +73,7 @@ class OllamaBackend:
         except urllib.error.URLError as e:
             raise OllamaError(f"cannot reach Ollama at {self.url}: {e.reason}") from e
 
-    def _build_request(self, payload: dict) -> urllib.request.Request:
+    def build_request(self, payload: dict) -> urllib.request.Request:
         return urllib.request.Request(
             f"{self.url}/api/generate",
             data=json.dumps(payload).encode("utf-8"),

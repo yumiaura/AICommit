@@ -38,10 +38,10 @@ class LlamaCppBackend:
             kwargs["n_ctx"] = n_ctx
         if n_threads is not None:
             kwargs["n_threads"] = n_threads
-        self._llm = Llama(**kwargs)
+        self.llm = Llama(**kwargs)
 
     def generate(self, prompt: str, *, temperature: float | None = None) -> str:
-        result = self._llm(
+        result = self.llm(
             prompt,
             max_tokens=self.max_tokens,
             temperature=self.temperature if temperature is None else temperature,
@@ -50,7 +50,7 @@ class LlamaCppBackend:
         return result["choices"][0]["text"].strip()
 
     def stream(self, prompt: str, *, temperature: float | None = None) -> Iterator[str]:
-        for chunk in self._llm(
+        for chunk in self.llm(
             prompt,
             max_tokens=self.max_tokens,
             temperature=self.temperature if temperature is None else temperature,

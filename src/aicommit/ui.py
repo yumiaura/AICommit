@@ -11,7 +11,7 @@ from collections.abc import Callable
 from aicommit import git
 
 
-class _A:
+class Ansi:
     RESET = "\x1b[0m"
     DIM = "\x1b[2m"
     BOLD = "\x1b[1m"
@@ -28,13 +28,13 @@ def use_color() -> bool:
     return sys.stdout.isatty()
 
 
-def _c(s: str, color: str) -> str:
+def colored(s: str, color: str) -> str:
     if not use_color():
         return s
-    return f"{color}{s}{_A.RESET}"
+    return f"{color}{s}{Ansi.RESET}"
 
 
-_STAT_NUMS = re.compile(r"^(?P<head>.+?\|\s*\d+\s*)(?P<marks>[+\-]+)\s*$")
+STAT_NUMS = re.compile(r"^(?P<head>.+?\|\s*\d+\s*)(?P<marks>[+\-]+)\s*$")
 
 
 def color_diff_stat(stat: str) -> str:
@@ -43,10 +43,10 @@ def color_diff_stat(stat: str) -> str:
         return stat
     out = []
     for line in stat.splitlines():
-        m = _STAT_NUMS.match(line)
+        m = STAT_NUMS.match(line)
         if m:
-            plus = _c("+" * m.group("marks").count("+"), _A.GREEN)
-            minus = _c("-" * m.group("marks").count("-"), _A.RED)
+            plus = colored("+" * m.group("marks").count("+"), Ansi.GREEN)
+            minus = colored("-" * m.group("marks").count("-"), Ansi.RED)
             out.append(f"{m.group('head')}{plus}{minus}")
         else:
             out.append(line)
@@ -57,16 +57,16 @@ def print_diff_stat(stat: str) -> None:
     if not stat.strip():
         return
     bar = "─" * 56
-    print(_c(bar, _A.DIM))
-    print(_c("staged changes:", _A.BOLD))
-    print(_c(bar, _A.DIM))
+    print(colored(bar, Ansi.DIM))
+    print(colored("staged changes:", Ansi.BOLD))
+    print(colored(bar, Ansi.DIM))
     print(color_diff_stat(stat.rstrip()))
 
 
-def _editor() -> list[str]:
+def editor() -> list[str]:
     """Return the editor invocation (split on whitespace; fallback to `nano`)."""
-    editor = os.environ.get("EDITOR") or os.environ.get("VISUAL") or "nano"
-    return editor.split()
+    name = os.environ.get("EDITOR") or os.environ.get("VISUAL") or "nano"
+    return name.split()
 
 
 def edit_message(initial: str) -> str:
@@ -77,7 +77,7 @@ def edit_message(initial: str) -> str:
             f.write(initial)
             if not initial.endswith("\n"):
                 f.write("\n")
-        subprocess.run([*_editor(), path], check=False)
+        subprocess.run([*editor(), path], check=False)
         with open(path) as f:
             return f.read().strip()
     finally:
@@ -89,14 +89,14 @@ def edit_message(initial: str) -> str:
 
 def print_proposal(message: str) -> None:
     bar = "─" * 56
-    print(_c(bar, _A.DIM))
-    print(_c("proposed commit message:", _A.BOLD))
-    print(_c(bar, _A.DIM))
+    print(colored(bar, Ansi.DIM))
+    print(colored("proposed commit message:", Ansi.BOLD))
+    print(colored(bar, Ansi.DIM))
     print(message)
-    print(_c(bar, _A.DIM))
+    print(colored(bar, Ansi.DIM))
 
 
-def _prompt_choice() -> str:
+def prompt_choice() -> str:
     """Read a single keystroke-y choice. Empty input == Enter == commit."""
     print()
     print("[ Enter = commit · e = edit · r = regenerate · q = quit ]")
@@ -118,7 +118,7 @@ def run_interactive(initial: str, *, regenerate: Callable[[], str]) -> int:
     message = initial
     while True:
         print_proposal(message)
-        choice = _prompt_choice()
+        choice = prompt_choice()
         if choice == "enter":
             try:
                 git.commit_with_message(message)

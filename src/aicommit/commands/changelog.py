@@ -55,7 +55,7 @@ Commits:
 """
 
 
-def _classify_conventional(subject: str) -> tuple[str | None, str]:
+def classify_conventional(subject: str) -> tuple[str | None, str]:
     """Return (bucket, cleaned_subject). bucket=None means skip, '?' means unknown."""
     m = CONVENTIONAL_RE.match(subject.strip())
     if not m:
@@ -71,7 +71,7 @@ def _classify_conventional(subject: str) -> tuple[str | None, str]:
     return bucket, rest
 
 
-def _format_commits(commits: list[tuple[str, str, str]]) -> str:
+def format_commits(commits: list[tuple[str, str, str]]) -> str:
     blocks = []
     for h, subject, body in commits:
         chunk = f"- {h} {subject}"
@@ -82,7 +82,7 @@ def _format_commits(commits: list[tuple[str, str, str]]) -> str:
     return "\n".join(blocks)
 
 
-def _render_deterministic(groups: dict[str, list[str]]) -> str:
+def render_deterministic(groups: dict[str, list[str]]) -> str:
     parts: list[str] = []
     for bucket in BUCKETS:
         bullets = groups.get(bucket) or []
@@ -105,20 +105,20 @@ def run(rev_range: str, *, cfg: Config, out_path: str | None = None) -> int:
         sys.stderr.write(f"no commits in range {rev_range}\n")
         return 1
 
-    body = _build_body(commits, cfg)
+    body = build_body(commits, cfg)
     if body is None:
         return 2
 
     section = f"## Unreleased\n\n{body.rstrip()}\n"
     if out_path:
-        _prepend_to_changelog(out_path, section)
+        prepend_to_changelog(out_path, section)
         print(f"wrote Unreleased section to {out_path}", file=sys.stderr)
     else:
         print(section)
     return 0
 
 
-def _build_body(
+def build_body(
     commits: list[tuple[str, str, str]],
     cfg: Config,
 ) -> str | None:
@@ -128,7 +128,7 @@ def _build_body(
 
     if cfg.changelog_skip_conventional:
         for h, subject, bodytxt in commits:
-            bucket, cleaned = _classify_conventional(subject)
+            bucket, cleaned = classify_conventional(subject)
             if bucket == "?":
                 unknowns.append((h, subject, bodytxt))
             elif bucket is None:
@@ -139,7 +139,7 @@ def _build_body(
         unknowns = list(commits)
 
     if not unknowns:
-        return _render_deterministic(groups)
+        return render_deterministic(groups)
 
     # Some commits resisted classification: ask the LLM to handle just those.
     try:
@@ -154,7 +154,7 @@ def _build_body(
         sys.stderr.write(f"error: {e}\n")
         return None
 
-    prompt = CHANGELOG_PROMPT.format(commits=_format_commits(unknowns))
+    prompt = CHANGELOG_PROMPT.format(commits=format_commits(unknowns))
     try:
         llm_body = backend.generate(prompt, temperature=0.1).strip()
     except OllamaError as e:
@@ -164,23 +164,23 @@ def _build_body(
         sys.stderr.write("error: empty response from LLM\n")
         return None
 
-    deterministic = _render_deterministic(groups).rstrip()
+    deterministic = render_deterministic(groups).rstrip()
     if not deterministic.strip():
         return llm_body
     return f"{deterministic}\n\n{llm_body}"
 
 
-def _prepend_to_changelog(path: str, section: str) -> None:
+def prepend_to_changelog(path: str, section: str) -> None:
     try:
         with open(path) as f:
             existing = f.read()
     except FileNotFoundError:
         existing = "# Changelog\n\n"
     with open(path, "w") as f:
-        f.write(_merge_unreleased(existing, section))
+        f.write(merge_unreleased(existing, section))
 
 
-def _merge_unreleased(existing: str, section: str) -> str:
+def merge_unreleased(existing: str, section: str) -> str:
     lines = existing.splitlines(keepends=True)
     start = None
     for i, line in enumerate(lines):

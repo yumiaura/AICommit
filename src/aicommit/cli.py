@@ -63,7 +63,7 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def _cli_overrides(args: argparse.Namespace) -> dict[str, dict[str, Any]]:
+def cli_overrides(args: argparse.Namespace) -> dict[str, dict[str, Any]]:
     overrides: dict[str, dict[str, Any]] = {}
     llm: dict[str, Any] = {}
     if args.backend:
@@ -89,7 +89,7 @@ def _cli_overrides(args: argparse.Namespace) -> dict[str, dict[str, Any]]:
     return overrides
 
 
-def _read_diff() -> tuple[str, bool]:
+def read_diff() -> tuple[str, bool]:
     if not sys.stdin.isatty():
         return sys.stdin.read(), True
     try:
@@ -101,7 +101,7 @@ def _read_diff() -> tuple[str, bool]:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    cfg = cfgmod.load(_cli_overrides(args))
+    cfg = cfgmod.load(cli_overrides(args))
     if args.debug:
         sys.stderr.write(f"[debug] config sources: {' < '.join(cfg.sources)}\n")
         sys.stderr.write(
@@ -113,11 +113,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "config":
         return config_cmd.run()
 
-    return _commit_flow(args, cfg)
+    return commit_flow(args, cfg)
 
 
-def _commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
-    diff, from_stdin = _read_diff()
+def commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
+    diff, from_stdin = read_diff()
     if not diff.strip():
         sys.stderr.write("no staged changes (and nothing on stdin)\n")
         return 1
@@ -151,13 +151,13 @@ def _commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
         include_body=cfg.commit_include_body,
     )
 
-    def _ask(temperature: float | None = None) -> str:
+    def ask(temperature: float | None = None) -> str:
         try:
             return backend.generate(prompt, temperature=temperature)
         except OllamaError as e:
-            raise SystemExit(_emit_ollama_error(e)) from e
+            raise SystemExit(emit_ollama_error(e)) from e
 
-    def _ask_stream() -> str:
+    def ask_stream() -> str:
         chunks: list[str] = []
         try:
             for piece in backend.stream(prompt):
@@ -165,7 +165,7 @@ def _commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
                 sys.stdout.write(piece)
                 sys.stdout.flush()
         except OllamaError as e:
-            raise SystemExit(_emit_ollama_error(e)) from e
+            raise SystemExit(emit_ollama_error(e)) from e
         sys.stdout.write("\n")
         return "".join(chunks).strip()
 
@@ -174,19 +174,19 @@ def _commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
     # boxed proposal renders cleanly.
     if from_stdin or args.print_only:
         if args.no_stream or not hasattr(backend, "stream"):
-            message = _ask()
+            message = ask()
             if not message:
                 sys.stderr.write("error: empty response from LLM\n")
                 return 2
             print(message)
         else:
-            message = _ask_stream()
+            message = ask_stream()
             if not message:
                 sys.stderr.write("error: empty response from LLM\n")
                 return 2
         return 0
 
-    message = _ask()
+    message = ask()
     if not message:
         sys.stderr.write("error: empty response from LLM\n")
         return 2
@@ -206,14 +206,14 @@ def _commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
 
     state = {"temperature": cfg.llm_temperature}
 
-    def _regenerate() -> str:
+    def regenerate() -> str:
         state["temperature"] = min(1.0, state["temperature"] + 0.15)
-        return _ask(temperature=state["temperature"])
+        return ask(temperature=state["temperature"])
 
-    return ui.run_interactive(message, regenerate=_regenerate)
+    return ui.run_interactive(message, regenerate=regenerate)
 
 
-def _emit_ollama_error(e: OllamaError) -> int:
+def emit_ollama_error(e: OllamaError) -> int:
     sys.stderr.write(f"error: {e}\n")
     if "cannot reach" in str(e):
         sys.stderr.write("hint: is `ollama serve` running and reachable?\n")

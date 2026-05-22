@@ -1,17 +1,17 @@
-from aicommit.commands.review import _parse_findings
+from aicommit.commands.review import parse_findings
 from aicommit.commands.review import run as run_review
 from aicommit.config import load
 
 
 def test_parse_findings_no_issues():
-    assert _parse_findings("NO_ISSUES") == []
-    assert _parse_findings("") == []
-    assert _parse_findings("\n\n") == []
+    assert parse_findings("NO_ISSUES") == []
+    assert parse_findings("") == []
+    assert parse_findings("\n\n") == []
 
 
 def test_parse_findings_structured():
     raw = "[critical] foo.py:1 — bug\n[warning] foo.py:2 — risky\n[nit] foo.py:3 — style"
-    out = _parse_findings(raw)
+    out = parse_findings(raw)
     assert out == [
         ("critical", "foo.py:1 — bug"),
         ("warning", "foo.py:2 — risky"),
@@ -20,7 +20,7 @@ def test_parse_findings_structured():
 
 
 def test_parse_findings_unstructured_defaults_to_warning():
-    out = _parse_findings("looks suspicious somewhere")
+    out = parse_findings("looks suspicious somewhere")
     assert out == [("warning", "looks suspicious somewhere")]
 
 
