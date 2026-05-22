@@ -12,7 +12,7 @@ DEFAULTS: dict[str, dict[str, Any]] = {
         "backend": "ollama",
         "model": "qwen2.5-coder:7b",
         "url": "http://localhost:11434",
-        "temperature": 0.2,
+        "temperature": 0.1,
         "max_tokens": 512,
     },
     "commit": {

@@ -17,7 +17,7 @@ DEFAULT_TEMPLATE = """\
 backend     = "ollama"                  # ollama | llama-cpp
 model       = "qwen2.5-coder:7b"
 url         = "http://localhost:11434"
-temperature = 0.2
+temperature = 0.1                       # lower = more deterministic, less hallucination
 max_tokens  = 512
 
 [commit]
