@@ -9,6 +9,7 @@ from aicommit import __version__, git, ui
 from aicommit import config as cfgmod
 from aicommit import diff as diffmod
 from aicommit.commands import changelog as changelog_cmd
+from aicommit.commands import config as config_cmd
 from aicommit.commands import review as review_cmd
 from aicommit.git import GitError
 from aicommit.llm import LLMError, OllamaError, make_backend
@@ -51,10 +52,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="disable token-by-token streaming in --print mode",
     )
 
-    sub = p.add_subparsers(dest="cmd", metavar="[changelog]")
+    sub = p.add_subparsers(dest="cmd", metavar="[changelog|config]")
     chg = sub.add_parser("changelog", help="generate a CHANGELOG.md entry from a git range")
     chg.add_argument("range", help="git revision range, e.g. v0.3.0..HEAD")
     chg.add_argument("--out", help="prepend to this file under ## Unreleased")
+    sub.add_parser(
+        "config",
+        help="create + open the user config in $EDITOR (falls back to vi)",
+    )
     return p
 
 
@@ -105,6 +110,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "changelog":
         return changelog_cmd.run(args.range, cfg=cfg, out_path=args.out)
+    if args.cmd == "config":
+        return config_cmd.run()
 
     return _commit_flow(args, cfg)
 
