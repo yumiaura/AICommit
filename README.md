@@ -23,13 +23,12 @@ Everything runs offline. No API keys, no data leaves the box.
 # 1. install a model in Ollama (any chat-instruct model works)
 ollama pull qwen2.5-coder:7b
 
-# 2. install aicommit (pipx is recommended — keeps it in its own venv)
-pipx install aicommit
-# …or: uv pip install -e .  for a local dev checkout
+# 2. install aicommit straight from GitHub
+pip install git+https://github.com/yumiaura/AICommit
 
 # 3. stage and let it write the message
-git add -p
-git aicommit
+git add -A
+aicommit
 ```
 
 > A demo asciicast lives in [`docs/demo.cast`](docs/demo.cast) — open it
