@@ -56,7 +56,18 @@ git aicommit changelog v0.4.0..HEAD --out CHANGELOG.md
 
 ## ⚙️ Configuration
 
-`~/.config/aicommit/config.toml`:
+Quickest way to get a config file:
+
+```bash
+aicommit config
+```
+
+That creates `~/.config/aicommit/config.toml` from the default template
+(if it doesn't exist yet) and opens it in `$EDITOR` — falling back to
+`$VISUAL`, then `nano`. Re-running just re-opens the file; your existing
+values are never clobbered.
+
+The file looks like this:
 
 ```toml
 [llm]
@@ -90,12 +101,6 @@ aicommit changelog <rev-range> [--out CHANGELOG.md]
 - `subprocess` to call `git`
 - `argparse` + `rich` for the CLI
 - `tomllib` (Python 3.11+) for config
-
----
-
-## 🗺️ Roadmap
-
-See [ROADMAP.md](ROADMAP.md).
 
 ---
 
