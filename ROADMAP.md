@@ -19,7 +19,7 @@ Acceptance: `git diff --staged | aicommit` prints a sensible message.
 - [x] `e` opens the message in `$EDITOR` (fallback: `vi`)
 - [x] `r` regenerates with a slightly different temperature
 - [x] `Enter` runs `git commit -F <tmpfile>`
-- [ ] Show a colored diff summary above the proposal
+- [x] Show a colored diff summary above the proposal
 
 ---
 

@@ -54,6 +54,11 @@ def main() -> int:
         print(message)
         return 0
 
+    try:
+        ui.print_diff_stat(git.staged_stat())
+    except GitError:
+        pass  # already showed; non-fatal
+
     # Interactive: each `r` bumps temperature slightly so re-rolls differ.
     state = {"temperature": DEFAULT_TEMPERATURE}
 
