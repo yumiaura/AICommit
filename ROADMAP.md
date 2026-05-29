@@ -25,7 +25,7 @@ Acceptance: `git diff --staged | aicommit` prints a sensible message.
 
 ## v0.3.0 — Git subcommand + config (1 day)
 
-- [ ] Install as `git-aicommit` on `$PATH` so `git aicommit` works
+- [x] Install as `git-aicommit` on `$PATH` so `git aicommit` works
 - [x] Read `~/.config/aicommit/config.toml`
 - [x] Per-repo override via `.aicommit.toml`
 - [ ] CLI flags override config (`--model`, `--no-body`, `--style plain`)
