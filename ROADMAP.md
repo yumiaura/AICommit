@@ -34,9 +34,9 @@ Acceptance: `git diff --staged | aicommit` prints a sensible message.
 
 ## v0.4.0 — Changelog mode (1 day)
 
-- [ ] `aicommit changelog <range>` reads `git log --pretty=...`
-- [ ] LLM groups commits into Added / Changed / Fixed / Removed
-- [ ] `--out CHANGELOG.md` prepends to the existing changelog under `## Unreleased`
+- [x] `aicommit changelog <range>` reads `git log --pretty=...`
+- [x] LLM groups commits into Added / Changed / Fixed / Removed
+- [x] `--out CHANGELOG.md` prepends to the existing changelog under `## Unreleased`
 - [ ] Detects Conventional Commit prefixes and skips the LLM when possible
 
 ---
