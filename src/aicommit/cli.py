@@ -9,6 +9,7 @@ from aicommit import __version__
 from aicommit import config as cfgmod
 from aicommit import git, ui
 from aicommit.commands import changelog as changelog_cmd
+from aicommit.commands import review as review_cmd
 from aicommit.git import GitError
 from aicommit.llm import LLMError, OllamaError, make_backend
 from aicommit.prompts import build_commit_prompt
@@ -31,6 +32,17 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-body", action="store_true")
     p.add_argument("--print", action="store_true", dest="print_only")
     p.add_argument("-y", "--yes", action="store_true")
+    p.add_argument(
+        "--review",
+        action="store_true",
+        help="run a pre-commit review pass before generating the message",
+    )
+    p.add_argument(
+        "--review-only",
+        action="store_true",
+        dest="review_only",
+        help="run the review pass and exit (useful in CI; exits 1 if findings)",
+    )
     p.add_argument("--debug", action="store_true")
 
     sub = p.add_subparsers(dest="cmd", metavar="[changelog]")
@@ -96,6 +108,14 @@ def _commit_flow(args: argparse.Namespace, cfg: cfgmod.Config) -> int:
     if not diff.strip():
         sys.stderr.write("no staged changes (and nothing on stdin)\n")
         return 1
+
+    if args.review_only:
+        return review_cmd.run(diff, cfg=cfg, review_only=True)
+
+    if args.review or cfg.review_enabled:
+        rc = review_cmd.run(diff, cfg=cfg, review_only=False)
+        if rc != 0:
+            return rc
 
     try:
         backend = make_backend(

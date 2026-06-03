@@ -43,9 +43,9 @@ Acceptance: `git diff --staged | aicommit` prints a sensible message.
 
 ## v0.5.0 — `--review` mode (1–2 days)
 
-- [ ] Optional pre-commit review pass: LLM looks for likely bugs in the diff
-- [ ] Findings printed as warnings with `[skip]` / `[fix first]` actions
-- [ ] `--review-only` flag exits without committing (useful in CI)
+- [x] Optional pre-commit review pass: LLM looks for likely bugs in the diff
+- [x] Findings printed as warnings with `[skip]` / `[fix first]` actions
+- [x] `--review-only` flag exits without committing (useful in CI)
 
 ---
 
