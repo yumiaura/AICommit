@@ -21,12 +21,14 @@ def make_backend(
     if backend == "llama-cpp":
         try:
             from aicommit.llm.llama_cpp import LlamaCppBackend
+            return LlamaCppBackend(model=model, temperature=temperature, max_tokens=max_tokens)
         except ImportError as e:
             raise LLMError(
                 "llama-cpp backend requested but llama-cpp-python is not installed; "
                 "install with `pip install 'aicommit[llama-cpp]'`"
             ) from e
-        return LlamaCppBackend(model=model, temperature=temperature, max_tokens=max_tokens)
+        except (RuntimeError, FileNotFoundError) as e:
+            raise LLMError(f"llama-cpp backend failed to initialise: {e}") from e
     raise LLMError(f"unknown backend: {backend!r}")
 
 

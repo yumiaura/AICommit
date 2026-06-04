@@ -17,6 +17,14 @@ classifiers = [
 ]
 dependencies = []
 
+[project.optional-dependencies]
+llama-cpp = ["llama-cpp-python>=0.2.0"]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.4",
+    "mypy>=1.8",
+]
+
 [project.scripts]
 aicommit = "aicommit.cli:main"
 git-aicommit = "aicommit.cli:main"
