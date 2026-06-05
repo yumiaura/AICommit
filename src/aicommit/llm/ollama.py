@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import urllib.error
 import urllib.request
+from typing import Iterator
 
 
 class OllamaError(RuntimeError):
@@ -48,6 +49,29 @@ class OllamaBackend:
         except urllib.error.URLError as e:
             raise OllamaError(f"cannot reach Ollama at {self.url}: {e.reason}") from e
         return body.get("response", "").strip()
+
+    def stream(self, prompt: str, *, temperature: float | None = None) -> Iterator[str]:
+        """Yield response chunks as they arrive from Ollama's NDJSON stream."""
+        req = self._build_request(self._payload(prompt, temperature=temperature, stream=True))
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                for raw in resp:
+                    if not raw.strip():
+                        continue
+                    try:
+                        chunk = json.loads(raw.decode("utf-8"))
+                    except json.JSONDecodeError:
+                        continue
+                    piece = chunk.get("response", "")
+                    if piece:
+                        yield piece
+                    if chunk.get("done"):
+                        return
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode("utf-8", errors="replace")
+            raise OllamaError(f"Ollama HTTP {e.code}: {detail.strip()}") from e
+        except urllib.error.URLError as e:
+            raise OllamaError(f"cannot reach Ollama at {self.url}: {e.reason}") from e
 
     def _build_request(self, payload: dict) -> urllib.request.Request:
         return urllib.request.Request(
