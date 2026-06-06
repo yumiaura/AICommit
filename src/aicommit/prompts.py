@@ -1,6 +1,14 @@
 """Prompt templates used by aicommit subcommands."""
 from __future__ import annotations
 
+from aicommit.diff import truncate_diff
+
+# Default budget for the diff portion of a commit prompt (in tokens).
+# Leaves room for the system + rules + the LLM's response inside a typical
+# 4k–8k context window.
+DEFAULT_DIFF_TOKEN_BUDGET = 2048
+
+
 COMMIT_SYSTEM = (
     "You are a senior engineer writing ONE Conventional Commit message for the staged diff below."
 )
@@ -23,6 +31,7 @@ def build_commit_prompt(
     *,
     style: str = "conventional",
     include_body: bool = True,
+    diff_token_budget: int = DEFAULT_DIFF_TOKEN_BUDGET,
 ) -> str:
     rules = COMMIT_RULES_CONVENTIONAL if style == "conventional" else COMMIT_RULES_PLAIN
     if not include_body:
@@ -30,4 +39,5 @@ def build_commit_prompt(
             "- Blank line, then an optional body explaining the *why*, wrapped at ~72 cols.\n",
             "- Subject line only — DO NOT write a body.\n",
         )
-    return f"{COMMIT_SYSTEM}\n\n{rules}\n\nDiff:\n---\n{diff}\n---\n"
+    trimmed, _ = truncate_diff(diff, diff_token_budget)
+    return f"{COMMIT_SYSTEM}\n\n{rules}\n\nDiff:\n---\n{trimmed}\n---\n"
