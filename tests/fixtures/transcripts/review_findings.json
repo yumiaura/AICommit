@@ -1,0 +1,6 @@
+[
+  {
+    "endpoint": "/api/generate",
+    "response": "[critical] src/auth.py:42 — token compared with == leaks timing info\n[warning] src/auth.py:50 — missing None check before .decode\n[nit] src/auth.py:60 — variable name `x` is unclear"
+  }
+]

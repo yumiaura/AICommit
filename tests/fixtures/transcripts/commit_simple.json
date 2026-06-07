@@ -1,0 +1,6 @@
+[
+  {
+    "endpoint": "/api/generate",
+    "response": "feat(parser): handle empty input gracefully\n\n- return [] instead of raising on whitespace-only files\n- add regression test for the empty-file case"
+  }
+]

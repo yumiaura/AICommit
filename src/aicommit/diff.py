@@ -24,9 +24,11 @@ def estimate_tokens(text: str) -> int:
 def truncate_diff(diff: str, max_tokens: int) -> tuple[str, bool]:
     """Trim a diff so its char-equivalent token count fits inside `max_tokens`.
 
-    Truncation is at file boundaries — never mid-hunk — and appends a single
-    `[... truncated N more files (M chars) ...]` marker so the LLM knows it
-    didn't see everything.
+    Strategy: fit as many *whole files* as the budget allows. If even the
+    first file is too big, hard-truncate it and emit a marker explaining
+    how much was dropped. The trailing
+    `[... truncated N more file(s) ...]` line is always present when the
+    diff was modified, so the LLM knows it didn't see everything.
 
     Returns (trimmed_diff, was_truncated).
     """
@@ -37,34 +39,49 @@ def truncate_diff(diff: str, max_tokens: int) -> tuple[str, bool]:
         return diff, False
 
     files = _FILE_HEADER.split(diff)
-    # files[0] is anything before the first `diff --git` (usually empty
-    # for diffs from `git diff --staged`); keep it verbatim.
+    preamble = files[0] if files else ""
+    file_chunks = files[1:] if len(files) > 1 else []
+    if not file_chunks:
+        # No `diff --git` headers — treat the whole thing as one blob.
+        trimmed = diff[:budget_chars]
+        skipped = len(diff) - budget_chars
+        return f"{trimmed}\n[... truncated {skipped} chars ...]\n", True
+
     out: list[str] = []
     used = 0
-    if files and files[0]:
-        out.append(files[0])
-        used = len(files[0])
+    if preamble:
+        out.append(preamble)
+        used = len(preamble)
 
-    kept_files = 0
-    for chunk in files[1:]:
-        if used + len(chunk) > budget_chars and kept_files > 0:
+    kept = 0
+    for chunk in file_chunks:
+        if used + len(chunk) > budget_chars:
             break
         out.append(chunk)
         used += len(chunk)
-        kept_files += 1
+        kept += 1
 
-    skipped_files = max(0, len(files) - 1 - kept_files)
-    if skipped_files == 0 and len(diff) > used:
-        # The first file alone exceeds the budget — hard-truncate it.
-        single = files[1] if len(files) > 1 else diff
-        out = [files[0] if files else ""]
-        out.append(single[: budget_chars - len(out[0])])
-        skipped_bytes = len(single) - (budget_chars - len(out[0]))
-        out.append(f"\n[... truncated {skipped_bytes} chars within this file ...]\n")
+    if kept > 0:
+        skipped_files = len(file_chunks) - kept
+        skipped_bytes = sum(len(c) for c in file_chunks[kept:])
+        out.append(
+            f"\n[... truncated {skipped_files} more file(s), ~{skipped_bytes} chars ...]\n"
+        )
         return "".join(out), True
 
-    skipped_bytes = len(diff) - used
-    out.append(f"\n[... truncated {skipped_files} more file(s), ~{skipped_bytes} chars ...]\n")
+    # Budget too tight to fit even the first file — hard-truncate it.
+    first = file_chunks[0]
+    keep_chars = max(0, budget_chars - used)
+    trimmed = first[:keep_chars]
+    out.append(trimmed)
+    skipped_in_file = len(first) - keep_chars
+    extra_files = len(file_chunks) - 1
+    extra_bytes = sum(len(c) for c in file_chunks[1:])
+    msg = f"\n[... truncated {skipped_in_file} chars within this file"
+    if extra_files > 0:
+        msg += f" + {extra_files} more file(s), ~{extra_bytes} chars"
+    msg += " ...]\n"
+    out.append(msg)
     return "".join(out), True
 
 

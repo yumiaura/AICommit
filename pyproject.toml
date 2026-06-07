@@ -1,6 +1,6 @@
 [project]
 name = "aicommit"
-version = "0.5.0"
+version = "0.6.0"
 description = "AI commit messages from your local LLM"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -38,3 +38,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/aicommit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"

@@ -1,0 +1,10 @@
+[
+  {
+    "endpoint": "/api/generate",
+    "response": "fix(parser): tolerate whitespace-only input"
+  },
+  {
+    "endpoint": "/api/generate",
+    "response": "feat(parser): treat empty input as an empty result"
+  }
+]
