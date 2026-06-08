@@ -1,4 +1,5 @@
-from aicommit.commands.review import _parse_findings, run as run_review
+from aicommit.commands.review import _parse_findings
+from aicommit.commands.review import run as run_review
 from aicommit.config import load
 
 

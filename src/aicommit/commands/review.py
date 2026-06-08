@@ -6,7 +6,6 @@ import sys
 from aicommit.config import Config
 from aicommit.llm import OllamaError, make_backend
 
-
 REVIEW_PROMPT = """You are a senior engineer reviewing the staged diff for likely defects.
 
 Output rules:

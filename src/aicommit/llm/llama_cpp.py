@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from typing import Iterator
+from collections.abc import Iterator
 
 
 class LlamaCppBackend:
@@ -21,7 +21,7 @@ class LlamaCppBackend:
         n_threads: int | None = None,
     ) -> None:
         try:
-            from llama_cpp import Llama  # type: ignore
+            from llama_cpp import Llama
         except ImportError as e:
             raise RuntimeError(
                 "llama-cpp-python is not installed; install with `pip install 'aicommit[llama-cpp]'`"

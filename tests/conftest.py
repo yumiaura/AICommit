@@ -23,7 +23,7 @@ class _FakeResponse:
     def __init__(self, body: bytes) -> None:
         self._buf = io.BytesIO(body)
 
-    def __enter__(self) -> "_FakeResponse":
+    def __enter__(self) -> _FakeResponse:
         return self
 
     def __exit__(self, *_: object) -> None:
@@ -33,8 +33,7 @@ class _FakeResponse:
         return self._buf.getvalue()
 
     def __iter__(self):  # NDJSON streaming
-        for line in self._buf.getvalue().splitlines(keepends=True):
-            yield line
+        yield from self._buf.getvalue().splitlines(keepends=True)
 
 
 class Cassette:
