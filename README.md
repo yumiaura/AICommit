@@ -23,13 +23,17 @@ Everything runs offline. No API keys, no data leaves the box.
 # 1. install a model in Ollama (any chat-instruct model works)
 ollama pull qwen2.5-coder:7b
 
-# 2. install aicommit
-uv pip install -e .
+# 2. install aicommit (pipx is recommended — keeps it in its own venv)
+pipx install aicommit
+# …or: uv pip install -e .  for a local dev checkout
 
 # 3. stage and let it write the message
 git add -p
 git aicommit
 ```
+
+> A demo asciicast lives in [`docs/demo.cast`](docs/demo.cast) — open it
+> with `asciinema play docs/demo.cast` or paste into asciinema.org.
 
 Sample interaction:
 
@@ -68,7 +72,16 @@ max_subject_len = 72
 include_body    = true
 ```
 
-Environment variables override the file (`AICOMMIT_MODEL=...`).
+Environment variables override the file (`AICOMMIT_MODEL=...`), and CLI
+flags override env. Per-repo overrides go in `<repo>/.aicommit.toml`.
+
+Useful flags:
+
+```text
+aicommit [--model M] [--url URL] [--temperature T] [--style {conventional,plain}]
+         [--no-body] [--review] [--review-only] [--print] [-y] [--debug]
+aicommit changelog <rev-range> [--out CHANGELOG.md]
+```
 
 ---
 
