@@ -28,7 +28,7 @@ pip install git+https://github.com/yumiaura/AICommit
 
 # 3. stage and let it write the message
 git add -A
-aicommit
+git aicommit
 ```
 
 > A demo asciicast lives in [`docs/demo.cast`](docs/demo.cast) — open it
