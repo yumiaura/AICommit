@@ -64,8 +64,8 @@ def print_diff_stat(stat: str) -> None:
 
 
 def _editor() -> list[str]:
-    """Return the editor invocation (split on whitespace; fallback to `vi`)."""
-    editor = os.environ.get("EDITOR") or os.environ.get("VISUAL") or "vi"
+    """Return the editor invocation (split on whitespace; fallback to `nano`)."""
+    editor = os.environ.get("EDITOR") or os.environ.get("VISUAL") or "nano"
     return editor.split()
 
 
