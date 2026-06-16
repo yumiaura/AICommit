@@ -5,7 +5,7 @@ def test_defaults_when_nothing_set(isolated_home):
     cfg = load()
     assert cfg.llm_backend == "ollama"
     assert cfg.llm_url == "http://localhost:11434"
-    assert cfg.llm_temperature == 0.2
+    assert cfg.llm_temperature == 0.1
     assert cfg.sources == ["defaults"]
 
 
