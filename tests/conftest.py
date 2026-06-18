@@ -17,23 +17,23 @@ if str(SRC) not in sys.path:
 FIXTURES = Path(__file__).parent / "fixtures" / "transcripts"
 
 
-class _FakeResponse:
+class FakeResponse:
     """File-like object that mimics urllib.request.urlopen's return value."""
 
     def __init__(self, body: bytes) -> None:
-        self._buf = io.BytesIO(body)
+        self.buf = io.BytesIO(body)
 
-    def __enter__(self) -> _FakeResponse:
+    def __enter__(self) -> FakeResponse:
         return self
 
     def __exit__(self, *_: object) -> None:
         return None
 
     def read(self) -> bytes:
-        return self._buf.getvalue()
+        return self.buf.getvalue()
 
     def __iter__(self):  # NDJSON streaming
-        yield from self._buf.getvalue().splitlines(keepends=True)
+        yield from self.buf.getvalue().splitlines(keepends=True)
 
 
 class Cassette:
@@ -84,7 +84,7 @@ def cassette(monkeypatch):
                 payload = json.loads(req.data.decode("utf-8"))
             except Exception:
                 payload = {}
-            return _FakeResponse(cas.next_response(payload))
+            return FakeResponse(cas.next_response(payload))
 
         monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
         return cas

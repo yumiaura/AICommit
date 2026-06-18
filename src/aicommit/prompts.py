@@ -13,7 +13,7 @@ COMMIT_SYSTEM = (
     "You are a senior engineer writing ONE Conventional Commit message for the staged diff below."
 )
 
-_ANTI_HALLUCINATION = """- Describe ONLY what the diff literally changes. Do not invent
+ANTI_HALLUCINATION = """- Describe ONLY what the diff literally changes. Do not invent
   motivations, follow-ups, integrations, or relationships that are
   not visible in the diff itself.
 - If you cannot reasonably infer the *why* from the diff alone,
@@ -27,13 +27,13 @@ COMMIT_RULES_CONVENTIONAL = f"""Rules:
   (feat/fix/chore/docs/refactor/test/build/ci/perf/style/revert),
   optional (scope), no trailing period.
 - Blank line, then an optional body explaining the *why*, wrapped at ~72 cols.
-{_ANTI_HALLUCINATION}
+{ANTI_HALLUCINATION}
 - Output ONLY the commit message. No markdown fences, no preamble, no commentary."""
 
 COMMIT_RULES_PLAIN = f"""Rules:
 - Subject line: imperative mood, <=72 chars, no type prefix, no trailing period.
 - Blank line, then an optional body explaining the *why*, wrapped at ~72 cols.
-{_ANTI_HALLUCINATION}
+{ANTI_HALLUCINATION}
 - Output ONLY the commit message. No markdown fences, no preamble, no commentary."""
 
 

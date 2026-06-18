@@ -50,21 +50,21 @@ def run(diff: str, *, cfg: Config, review_only: bool = False) -> int:
         sys.stderr.write(f"error: {e}\n")
         return 2
 
-    findings = _parse_findings(raw)
+    findings = parse_findings(raw)
     if not findings:
         if review_only:
             print("✓ review: no findings", file=sys.stderr)
         return 0
 
-    _print_findings(findings)
+    print_findings(findings)
     if review_only:
         # exit code reflects whether anything was flagged
         return 1 if findings else 0
 
-    return _prompt_continue(findings)
+    return prompt_continue(findings)
 
 
-def _parse_findings(raw: str) -> list[tuple[str, str]]:
+def parse_findings(raw: str) -> list[tuple[str, str]]:
     """Return [(severity, body)] for each finding. Returns [] for NO_ISSUES."""
     if not raw or raw.upper().startswith("NO_ISSUES"):
         return []
@@ -81,20 +81,20 @@ def _parse_findings(raw: str) -> list[tuple[str, str]]:
     return out
 
 
-def _print_findings(findings: list[tuple[str, str]]) -> None:
-    from aicommit.ui import _A, _c
+def print_findings(findings: list[tuple[str, str]]) -> None:
+    from aicommit.ui import Ansi, colored
 
-    print(_c("─" * 56, _A.DIM), file=sys.stderr)
-    print(_c(f"review: {len(findings)} finding(s)", _A.BOLD), file=sys.stderr)
-    print(_c("─" * 56, _A.DIM), file=sys.stderr)
-    sev_color = {"critical": _A.RED, "warning": _A.YELLOW, "nit": _A.CYAN}
+    print(colored("─" * 56, Ansi.DIM), file=sys.stderr)
+    print(colored(f"review: {len(findings)} finding(s)", Ansi.BOLD), file=sys.stderr)
+    print(colored("─" * 56, Ansi.DIM), file=sys.stderr)
+    sev_color = {"critical": Ansi.RED, "warning": Ansi.YELLOW, "nit": Ansi.CYAN}
     for sev, body in findings:
-        tag = _c(f"[{sev}]", sev_color.get(sev, _A.YELLOW))
+        tag = colored(f"[{sev}]", sev_color.get(sev, Ansi.YELLOW))
         print(f"{tag} {body}", file=sys.stderr)
-    print(_c("─" * 56, _A.DIM), file=sys.stderr)
+    print(colored("─" * 56, Ansi.DIM), file=sys.stderr)
 
 
-def _prompt_continue(findings: list[tuple[str, str]]) -> int:
+def prompt_continue(findings: list[tuple[str, str]]) -> int:
     has_critical = any(sev == "critical" for sev, _ in findings)
     label = "continue (commit anyway) [s] / fix first (abort) [f]"
     if has_critical:

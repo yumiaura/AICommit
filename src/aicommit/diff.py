@@ -13,7 +13,7 @@ import re
 # more*, not less.
 CHARS_PER_TOKEN = 4
 
-_FILE_HEADER = re.compile(r"(?m)^(?=diff --git )")
+FILE_HEADER = re.compile(r"(?m)^(?=diff --git )")
 
 
 def estimate_tokens(text: str) -> int:
@@ -37,7 +37,7 @@ def truncate_diff(diff: str, max_tokens: int) -> tuple[str, bool]:
     if len(diff) <= budget_chars:
         return diff, False
 
-    files = _FILE_HEADER.split(diff)
+    files = FILE_HEADER.split(diff)
     preamble = files[0] if files else ""
     file_chunks = files[1:] if len(files) > 1 else []
     if not file_chunks:
@@ -87,7 +87,7 @@ def truncate_diff(diff: str, max_tokens: int) -> tuple[str, bool]:
 def summary_for_llm(diff: str) -> str:
     """Cheap shorthand for very large diffs: just list filenames + line counts."""
     files: list[str] = []
-    for chunk in _FILE_HEADER.split(diff)[1:]:
+    for chunk in FILE_HEADER.split(diff)[1:]:
         first = chunk.splitlines()[0]
         adds = chunk.count("\n+") - chunk.count("\n+++")
         dels = chunk.count("\n-") - chunk.count("\n---")

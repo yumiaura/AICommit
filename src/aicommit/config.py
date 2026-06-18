@@ -75,24 +75,24 @@ def repo_config_path(start: Path | None = None) -> Path | None:
     return None
 
 
-def _deep_merge(base: dict, override: dict) -> dict:
+def deep_merge(base: dict, override: dict) -> dict:
     out = dict(base)
     for k, v in override.items():
         if isinstance(v, dict) and isinstance(out.get(k), dict):
-            out[k] = _deep_merge(out[k], v)
+            out[k] = deep_merge(out[k], v)
         else:
             out[k] = v
     return out
 
 
-def _load_toml(path: Path | None) -> dict:
+def load_toml(path: Path | None) -> dict:
     if path is None or not path.is_file():
         return {}
     with path.open("rb") as f:
         return tomllib.load(f)
 
 
-def _coerce(val: str, default: Any) -> Any:
+def coerce(val: str, default: Any) -> Any:
     if isinstance(default, bool):
         return val.lower() in {"1", "true", "yes", "y", "on"}
     if isinstance(default, int) and not isinstance(default, bool):
@@ -116,15 +116,15 @@ def load(cli_overrides: dict[str, dict[str, Any]] | None = None) -> Config:
     merged: dict = {k: dict(v) for k, v in DEFAULTS.items()}
 
     user_path = user_config_path()
-    user_cfg = _load_toml(user_path)
+    user_cfg = load_toml(user_path)
     if user_cfg:
-        merged = _deep_merge(merged, user_cfg)
+        merged = deep_merge(merged, user_cfg)
         sources.append(f"user({user_path})")
 
     repo_path = repo_config_path()
-    repo_cfg = _load_toml(repo_path)
+    repo_cfg = load_toml(repo_path)
     if repo_cfg:
-        merged = _deep_merge(merged, repo_cfg)
+        merged = deep_merge(merged, repo_cfg)
         sources.append(f"repo({repo_path})")
 
     env_changes: dict[str, dict[str, Any]] = {}
@@ -132,13 +132,13 @@ def load(cli_overrides: dict[str, dict[str, Any]] | None = None) -> Config:
         raw = os.environ.get(env_var)
         if raw is None:
             continue
-        env_changes.setdefault(section, {})[key] = _coerce(raw, DEFAULTS[section][key])
+        env_changes.setdefault(section, {})[key] = coerce(raw, DEFAULTS[section][key])
     if env_changes:
-        merged = _deep_merge(merged, env_changes)
+        merged = deep_merge(merged, env_changes)
         sources.append("env")
 
     if cli_overrides:
-        merged = _deep_merge(merged, cli_overrides)
+        merged = deep_merge(merged, cli_overrides)
         sources.append("cli")
 
     return Config(
