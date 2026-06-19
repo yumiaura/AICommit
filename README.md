@@ -106,6 +106,6 @@ aicommit changelog <rev-range> [--out CHANGELOG.md]
 
 ## 📄 License
 
-MIT (planned).
+[MIT](LICENSE).
 
 Author: [@yumiaura](https://github.com/yumiaura)
