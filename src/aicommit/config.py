@@ -17,7 +17,6 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     },
     "commit": {
         "style": "conventional",
-        "max_subject_len": 72,
         "include_body": True,
     },
     "review": {
@@ -50,7 +49,6 @@ class Config:
     llm_temperature: float
     llm_max_tokens: int
     commit_style: str
-    commit_max_subject_len: int
     commit_include_body: bool
     review_enabled: bool
     changelog_skip_conventional: bool
@@ -148,7 +146,6 @@ def load(cli_overrides: dict[str, dict[str, Any]] | None = None) -> Config:
         llm_temperature=float(merged["llm"]["temperature"]),
         llm_max_tokens=int(merged["llm"]["max_tokens"]),
         commit_style=str(merged["commit"]["style"]),
-        commit_max_subject_len=int(merged["commit"]["max_subject_len"]),
         commit_include_body=bool(merged["commit"]["include_body"]),
         review_enabled=bool(merged["review"]["enabled"]),
         changelog_skip_conventional=bool(merged["changelog"]["skip_conventional"]),
