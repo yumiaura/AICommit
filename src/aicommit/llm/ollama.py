@@ -17,7 +17,7 @@ class OllamaBackend:
         *,
         url: str,
         model: str,
-        temperature: float = 0.2,
+        temperature: float = 0.1,
         max_tokens: int = 512,
         timeout: float = 120.0,
     ) -> None:

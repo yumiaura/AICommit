@@ -4,14 +4,14 @@ version = "1.0.0"
 description = "AI commit messages from your local LLM"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "yumiaura" }]
 keywords = ["git", "commit", "llm", "ollama", "conventional-commits"]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -32,7 +32,10 @@ aicommit = "aicommit.cli:main"
 git-aicommit = "aicommit.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/yumiaura/aicommit"
+Homepage   = "https://github.com/yumiaura/AICommit"
+Source     = "https://github.com/yumiaura/AICommit"
+Issues     = "https://github.com/yumiaura/AICommit/issues"
+Changelog  = "https://github.com/yumiaura/AICommit/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]

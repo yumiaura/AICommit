@@ -58,7 +58,7 @@ def build_parser() -> argparse.ArgumentParser:
     chg.add_argument("--out", help="prepend to this file under ## Unreleased")
     sub.add_parser(
         "config",
-        help="create + open the user config in $EDITOR (falls back to vi)",
+        help="create + open the user config in $EDITOR (falls back to nano)",
     )
     return p
 
