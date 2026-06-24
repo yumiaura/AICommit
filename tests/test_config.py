@@ -57,3 +57,15 @@ def test_env_include_body_coerced_to_bool(isolated_home, monkeypatch):
     monkeypatch.setenv("AICOMMIT_INCLUDE_BODY", "false")
     cfg = load()
     assert cfg.commit_include_body is False
+
+
+def test_env_review_enabled_coerced_to_bool(isolated_home, monkeypatch):
+    monkeypatch.setenv("AICOMMIT_REVIEW_ENABLED", "true")
+    cfg = load()
+    assert cfg.review_enabled is True
+
+
+def test_env_changelog_skip_conventional_coerced_to_bool(isolated_home, monkeypatch):
+    monkeypatch.setenv("AICOMMIT_CHANGELOG_SKIP_CONVENTIONAL", "false")
+    cfg = load()
+    assert cfg.changelog_skip_conventional is False

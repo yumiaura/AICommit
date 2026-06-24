@@ -82,8 +82,9 @@ style        = "conventional"     # conventional | plain
 include_body = true
 ```
 
-Environment variables override the file (`AICOMMIT_MODEL=...`), and CLI
-flags override env. Per-repo overrides go in `<repo>/.aicommit.toml`.
+Environment variables override the file (`AICOMMIT_MODEL=...`,
+`AICOMMIT_REVIEW_ENABLED=true`), and CLI flags override env. Per-repo
+overrides go in `<repo>/.aicommit.toml`.
 
 Useful flags:
 

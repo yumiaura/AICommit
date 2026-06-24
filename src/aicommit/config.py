@@ -38,6 +38,8 @@ ENV_OVERRIDES: dict[str, tuple[str, str]] = {
     "AICOMMIT_MAX_TOKENS": ("llm", "max_tokens"),
     "AICOMMIT_STYLE": ("commit", "style"),
     "AICOMMIT_INCLUDE_BODY": ("commit", "include_body"),
+    "AICOMMIT_REVIEW_ENABLED": ("review", "enabled"),
+    "AICOMMIT_CHANGELOG_SKIP_CONVENTIONAL": ("changelog", "skip_conventional"),
 }
 
 
